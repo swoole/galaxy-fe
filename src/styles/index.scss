@@ -1,0 +1,242 @@
+@use './variables.scss' as *;
+@use './mixin.scss' as *;
+@use './transition.scss';
+@use './element-ui.scss';
+@use './sidebar.scss';
+
+body {
+  height: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
+  background: #EEF0F3;
+}
+
+label {
+  font-weight: 700;
+}
+
+html {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+#app {
+  height: 100%;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+a:focus,
+a:active {
+  outline: none;
+}
+
+a,
+a:focus,
+a:hover {
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+
+div:focus {
+  outline: none;
+}
+
+.clearfix {
+  &:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: " ";
+    clear: both;
+    height: 0;
+  }
+}
+
+.compact-form {
+  .el-form-item {
+    margin-bottom: 0 !important;
+  }
+}
+
+em.highlight {
+    background: #EFFF00;
+    font-style: inherit;
+    font-weight: 600;
+    color: black;
+}
+
+.filter-container {
+  .filter-container-right {
+    float: right;
+  }
+}
+
+.box-collapse {
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
+  border-radius: 4px;
+  border: 1px solid #ebeef5;
+  padding: 0 20px;
+  .el-collapse-item__content {
+    padding-bottom: 25px;
+    padding-top: 25px;
+  }
+}
+
+code {
+  color: #5e6d82;
+  background-color: #e6effb;
+  margin: 0 4px;
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 3px;
+  height: 1.5em;
+  line-height: 1.5em;
+}
+
+code.highlight {
+  color: #c7254e;
+  background-color: #f2f2f2;
+}
+
+// 单行文本溢出
+.oneline-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 多行文本溢出
+.lines-ellipsis {
+  overflow : hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  // 在style中增加 -webkit-line-clamp: 2;
+}
+
+.text-link,
+.text-link:hover,
+.text-link:visited {
+  color: #409eff;
+}
+
+.text-link-underline:hover {
+  text-decoration: underline;
+}
+
+// 描述列表label样式
+.desc-label {
+    color: #000;
+    font-weight: 400;
+    padding-bottom: 6px !important;
+}
+// 描述列表content样式
+.desc-content {
+  color: #909399;
+}
+
+// 一般性文字描述
+.desc-normal {
+  font-size: 14px;
+  line-height: 24px;
+  color: rgba(0, 0, 0, 0.755);
+}
+
+// 通用label
+.universal-label {
+  color: #606266;
+  font-size: 14px;
+  font-weight: 700
+}
+
+// 主要布局盒子
+.app-main,
+.project-main {
+  position: relative;
+  background: #fff;
+  margin: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.little-tips {
+  font-size: 12px;
+  color: #f56c6c;
+}
+
+// 清除line-height
+.clear-line-height {
+  &, & * {
+    line-height: normal;
+  }
+}
+
+.text-success {
+  color:#67C23A;
+}
+
+.text-warning {
+    color: #E6A23C;
+}
+
+.text-danger {
+    color: #F56C6C;
+}
+
+.text-info {
+    color: #909399;
+}
+
+// 定时器
+.cell {
+    &-div {
+        margin-bottom: 8px;
+    }
+
+    &-symbol {
+        color: #67C23A;
+    }
+}
+
+.cron {
+    &-row {
+        margin-top: 8px;
+        max-width: 550px;
+    }
+}
+
+.not-select {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -khtml-user-select: none;
+  user-select: none;
+}
+
+.word-wrap {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+// 内联链接
+.inline {
+  font-size: 1em;
+  vertical-align: initial;
+}
+
+.tag-item-5:not(:first-child) {
+  margin-left: 5px;
+}
+
+.tag-item-10:not(:first-child) {
+  margin-left: 10px;
+}

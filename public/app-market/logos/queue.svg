@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Message queue">
+  <rect width="128" height="128" rx="24" fill="#ea580c"/>
+  <path fill="#fff" d="M27 34h58L72 21l10-10 30 30-30 30-10-10 13-13H27zm74 60H43l13 13-10 10-30-30 30-30 10 10-13 13h58z"/>
+</svg>

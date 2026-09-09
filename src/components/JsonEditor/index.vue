@@ -1,0 +1,89 @@
+<template>
+  <div class="json-editor">
+    <textarea ref="textarea" />
+  </div>
+</template>
+
+<script>
+import CodeMirror from 'codemirror'
+import 'codemirror/addon/lint/lint.css'
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/theme/rubyblue.css'
+import 'codemirror/mode/javascript/javascript'
+import 'codemirror/addon/lint/lint'
+import 'codemirror/addon/lint/json-lint'
+// eslint-disable-next-line
+require('script-loader!jsonlint')
+
+export default {
+  name: 'JsonEditor',
+  model: {
+    prop: 'value'
+  },
+  props: {
+    value: {
+      type: String,
+      default: ''
+    },
+    readonly: {
+      type: Boolean,
+      default: false
+    },
+    extraConfig: {
+      type: Object,
+      default: () => { return {} }
+    }
+  },
+  data () {
+    return {
+      jsonEditor: false
+    }
+  },
+  watch: {
+    value (value) {
+      const editorValue = this.jsonEditor.getValue()
+      if (value !== editorValue) {
+        this.jsonEditor.setValue(this.value || '')
+      }
+    }
+  },
+  mounted () {
+    this.jsonEditor = CodeMirror.fromTextArea(this.$refs.textarea, Object.assign({}, {
+      lineNumbers: true,
+      mode: 'application/json',
+      gutters: ['CodeMirror-lint-markers'],
+      theme: 'rubyblue',
+      lint: true,
+      readOnly: this.readonly ? 'nocursor' : false
+    }, this.extraConfig))
+
+    this.jsonEditor.setValue(this.value || '')
+    this.jsonEditor.on('change', cm => {
+      this.$emit('changed', cm.getValue())
+      this.$emit('input', cm.getValue())
+    })
+  },
+  methods: {
+    getValue () {
+      return JSON.stringify(this.jsonEditor.getValue())
+    }
+  }
+}
+</script>
+
+<style scoped>
+.json-editor{
+  height: 100%;
+  position: relative;
+}
+.json-editor >>> .CodeMirror {
+  height: auto;
+  min-height: 300px;
+}
+.json-editor >>> .CodeMirror-scroll{
+  min-height: 300px;
+}
+.json-editor >>> .cm-s-rubyblue span.cm-string {
+  color: #F08047;
+}
+</style>

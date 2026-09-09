@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="MySQL">
+  <rect width="128" height="128" rx="24" fill="#08668e"/>
+  <path fill="#fff" d="M25 91V40h15l13 27 13-27h15v51H69V59L57 84h-8L37 59v32zm63-2c6-12 8-23 6-34 11 4 19 12 24 23-8-3-16-2-23 3-2 3-4 6-7 8z"/>
+</svg>

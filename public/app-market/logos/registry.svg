@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Docker Registry">
+  <rect width="128" height="128" rx="24" fill="#2496ED"/>
+  <path fill="#fff" d="M30 44h68v8H30zm0 16h68v4H30zm0 12h52v4H30zm14 12h24v4H44zM30 44l6-14h56l6 14z" opacity=".9"/>
+  <circle cx="94" cy="40" r="10" fill="#fff" opacity=".3"/>
+</svg>

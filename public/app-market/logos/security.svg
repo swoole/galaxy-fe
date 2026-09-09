@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Docker Auth">
+  <rect width="128" height="128" rx="24" fill="#1A1A2E"/>
+  <path fill="#E94560" d="M64 16L28 34v22c0 24 15.4 46.4 36 52 20.6-5.6 36-28 36-52V34L64 16zm0 16c11 0 20 9 20 20s-9 20-20 20-20-9-20-20 9-20 20-20zm0 8c-6.6 0-12 5.4-12 12s5.4 12 12 12 12-5.4 12-12-5.4-12-12-12z"/>
+  <circle cx="64" cy="52" r="8" fill="#fff" opacity=".9"/>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="FRP">
+  <defs>
+    <linearGradient id="frp-gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="24" fill="url(#frp-gradient)"/>
+  <path fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" d="M31 43h50M47 64h50M31 85h50"/>
+  <path fill="#fff" d="m73 29 25 14-25 14zm-18 21L30 64l25 14zm18 21 25 14-25 14z"/>
+</svg>
