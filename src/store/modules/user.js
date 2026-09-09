@@ -1,4 +1,4 @@
-import { login, loginThirdparty, register } from '@/api/auth'
+import { login, register } from '@/api/auth'
 import { userSimpleProfile } from '@/api/user'
 import { orgSimpleProfile } from '@/api/org'
 import { Storage, StorageKeys, cookieSetUser, cookieRemoveUser } from '@/utils/storage'
@@ -29,31 +29,13 @@ const actions = {
   // 帐号密码登录
   login ({ commit }, params) {
     return new Promise((resolve, reject) => {
-      login(params.account, params.password, params.captcha, params.register_key)
+      login(params.account, params.password, params.captcha)
         .then(res => {
           commit('SET_USER', res.data.profile)
           commit('SET_LAST_ORG', res.data.last_org)
           Storage.setObj(StorageKeys.user, res.data.profile)
           Storage.setObj(StorageKeys.lastOrg, res.data.last_org)
           cookieSetUser(res.data.profile)
-          resolve(res)
-        }).catch(err => {
-          reject(err)
-        })
-    })
-  },
-  // 第三方登录
-  loginThirdparty ({ commit }, params) {
-    return new Promise((resolve, reject) => {
-      loginThirdparty(params.channel, params.token, params.ext)
-        .then(res => {
-          if (res.data.profile && !Storage.get(StorageKeys.user, null)) {
-            commit('SET_USER', res.data.profile)
-            commit('SET_LAST_ORG', res.data.last_org)
-            Storage.setObj(StorageKeys.user, res.data.profile)
-            Storage.setObj(StorageKeys.lastOrg, res.data.last_org)
-            cookieSetUser(res.data.profile)
-          }
           resolve(res)
         }).catch(err => {
           reject(err)

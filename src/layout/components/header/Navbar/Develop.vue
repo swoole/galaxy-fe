@@ -4,7 +4,6 @@
       <el-menu
         :default-active="activeMenu"
         class="nav-menu-container">
-        <menu-item v-if="false" :to="{ name: 'Workbench' }" index="Workbench" icon="observability" title="工作台" />
         <menu-item :to="{ name: 'Project' }" index="Project" icon="code2" title="项目" />
         <menu-item :to="{ name: 'DevEnv' }" index="DevEnv" icon="laptop-check" title="开发环境" />
       </el-menu>

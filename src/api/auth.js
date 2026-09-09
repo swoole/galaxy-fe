@@ -1,11 +1,11 @@
 import request from '@/utils/request'
 
 // 帐号密码登录
-export function login (account, password, captcha, registerKey = null) {
+export function login (account, password, captcha) {
   return request({
     url: 'login',
     method: 'post',
-    data: { account, password, captcha, register_key: registerKey }
+    data: { account, password, captcha }
   })
 }
 
@@ -67,23 +67,6 @@ export function sendCode (account, captcha, action) {
     url: 'login/code/send',
     method: 'post',
     data: { account, captcha, action }
-  })
-}
-
-// 第三方平台支持列表
-export function thirdpartySupports () {
-  return request({
-    url: 'login/thirdparty/support',
-    method: 'get'
-  })
-}
-
-// 第三方登录
-export function loginThirdparty (channel, token, ext = {}) {
-  return request({
-    url: 'login/thirdparty',
-    method: 'post',
-    data: { channel, token, ...ext }
   })
 }
 

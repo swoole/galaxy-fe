@@ -6,7 +6,6 @@
       background-color="#2D384B"
       text-color="#fff"
       active-text-color="#589EF8">
-      <!-- <menu-item to="/workspace" icon="workspace" title="工作台" /> -->
       <menu-item :to="{ name: 'DevelopLayout' }" index="DevelopLayout" :disabled="!orgId">
         <svg-icon icon-class="code2" />
         项目

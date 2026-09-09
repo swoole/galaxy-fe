@@ -1,31 +1,4 @@
 /**
- * 第三方登录配置
- */
-// 微信登录枚举值，TP means third-party
-export const TP_WECHAT = 1
-export const TP_QQ = 2
-export const TP_GITHUB = 4
-export const TP_GITEE = 3
-export const TP_CONFIG = {
-  [TP_WECHAT]: {
-    icon: 'colorful-wechat',
-    name: '微信'
-  },
-  [TP_QQ]: {
-    icon: 'colorful-qq',
-    name: 'QQ'
-  },
-  [TP_GITHUB]: {
-    icon: 'colorful-github',
-    name: 'GitHub'
-  },
-  [TP_GITEE]: {
-    icon: 'colorful-gitee',
-    name: '码云'
-  }
-}
-
-/**
  * 用户身份认证状态.
  */
 export const AUTH_STATUS_NO = 0

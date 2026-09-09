@@ -176,7 +176,7 @@ export default {
         this.loadPanels()
       })
     },
-    // 加载工作台各分区近期数据
+    // 加载组织概览各分区近期数据
     loadPanels () {
       groupList(this.orgId, null, 1, 6).then(res => {
         const d = res.data || {}

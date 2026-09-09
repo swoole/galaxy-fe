@@ -11,20 +11,6 @@
         <router-link :to="{ name: 'GroupSshKey', params: { groupId } }">
           <el-button type="primary" size="small">Git 平台密钥</el-button>
         </router-link>
-        <template v-if="false">
-          <router-link :to="{ name: 'WorkTodo', params: { groupId } }">
-            <el-button type="primary" size="small">待办事项</el-button>
-          </router-link>
-          <router-link :to="{ name: 'WorkTask', params: { groupId } }">
-            <el-button type="primary" size="small">工作任务</el-button>
-          </router-link>
-          <router-link :to="{ name: 'WorkRequirement', params: { groupId } }">
-            <el-button type="primary" size="small">需求清单</el-button>
-          </router-link>
-          <router-link :to="{ name: 'WorkCalendar', params: { groupId } }">
-            <el-button type="primary" size="small">协作日历</el-button>
-          </router-link>
-        </template>
       </div>
 
       <el-descriptions direction="vertical" :column="1" :colon="false" labelClassName="desc-label" contentClassName="desc-content">

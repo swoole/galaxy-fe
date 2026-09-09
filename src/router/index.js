@@ -41,18 +41,6 @@ Vue.use(Router)
  */
 export const constantRoutes = [
   {
-    path: '/thirdparty',
-    component: () => import('@/views/login/thirdparty'),
-    meta: { title: '第三方登录' },
-    hidden: true
-  },
-  {
-    path: '/thirdparty/bindaccount',
-    component: () => import('@/views/login/thirdparty/bind-account'),
-    meta: { title: '绑定账户' },
-    hidden: true
-  },
-  {
     path: '/login',
     component: () => import('@/views/login/index'),
     meta: { title: '登录' },
@@ -62,12 +50,6 @@ export const constantRoutes = [
     path: '/forgetpassword',
     component: () => import('@/views/login/forget-password'),
     meta: { title: '忘记密码' },
-    hidden: true
-  },
-  {
-    path: '/authorize',
-    component: () => import('@/views/login/authorize'),
-    meta: { title: '第三方授权' },
     hidden: true
   },
   {
@@ -192,12 +174,6 @@ export const constantRoutes = [
         name: 'DevelopLayout',
         meta: { title: '工作' },
         children: [
-          {
-            path: '/workbench',
-            name: 'Workbench',
-            component: () => import('@/views/work/workbench'),
-            meta: { nav: 'DevelopLayout', appNav: 'Workbench', title: '工作台' }
-          },
           {
             path: '/project',
             name: 'Project',
@@ -407,66 +383,6 @@ export const constantRoutes = [
             name: 'ProjectGovernance',
             component: () => import('@/views/project/governance'),
             meta: { nav: 'DevelopLayout', appNav: 'ProjectGovernance', title: '操作记录' }
-          },
-          {
-            path: '/project/:groupId/:projectId/work/todo',
-            name: 'ProjectWorkTodo',
-            component: () => import('@/views/work/WorkItemList'),
-            meta: { nav: 'DevelopLayout', appNav: 'ProjectWorkTodo', title: '待办事项', workType: 'todo' }
-          },
-          {
-            path: '/project/:groupId/:projectId/work/task',
-            name: 'ProjectWorkTask',
-            component: () => import('@/views/work/WorkItemList'),
-            meta: { nav: 'DevelopLayout', appNav: 'ProjectWorkTask', title: '工作任务', workType: 'task' }
-          },
-          {
-            path: '/project/:groupId/:projectId/work/requirement',
-            name: 'ProjectWorkRequirement',
-            component: () => import('@/views/work/WorkItemList'),
-            meta: { nav: 'DevelopLayout', appNav: 'ProjectWorkRequirement', title: '需求清单', workType: 'requirement' }
-          },
-          {
-            path: '/project/:groupId/:projectId/work/todo/:id',
-            name: 'ProjectWorkTodoDetail',
-            component: () => import('@/views/work/WorkItemDetail'),
-            meta: { nav: 'DevelopLayout', appNav: 'ProjectWorkTodo', title: '待办详情', workType: 'todo' }
-          },
-          {
-            path: '/project/:groupId/:projectId/work/task/:id',
-            name: 'ProjectWorkTaskDetail',
-            component: () => import('@/views/work/WorkItemDetail'),
-            meta: { nav: 'DevelopLayout', appNav: 'ProjectWorkTask', title: '任务详情', workType: 'task' }
-          },
-          {
-            path: '/project/:groupId/:projectId/work/requirement/:id',
-            name: 'ProjectWorkRequirementDetail',
-            component: () => import('@/views/work/WorkItemDetail'),
-            meta: { nav: 'DevelopLayout', appNav: 'ProjectWorkRequirement', title: '需求详情', workType: 'requirement' }
-          },
-          {
-            path: '/project/:groupId/:projectId/work/calendar',
-            name: 'ProjectWorkCalendar',
-            component: () => import('@/views/work/WorkCalendar'),
-            meta: { nav: 'DevelopLayout', appNav: 'ProjectWorkCalendar', title: '日历' }
-          },
-          {
-            path: '/project/:groupId/:projectId/work/todo/create',
-            name: 'ProjectWorkTodoCreate',
-            component: () => import('@/views/work/WorkItemDetail'),
-            meta: { nav: 'DevelopLayout', appNav: 'ProjectWorkTodo', title: '新建待办', workType: 'todo' }
-          },
-          {
-            path: '/project/:groupId/:projectId/work/task/create',
-            name: 'ProjectWorkTaskCreate',
-            component: () => import('@/views/work/WorkItemDetail'),
-            meta: { nav: 'DevelopLayout', appNav: 'ProjectWorkTask', title: '新建任务', workType: 'task' }
-          },
-          {
-            path: '/project/:groupId/:projectId/work/requirement/create',
-            name: 'ProjectWorkRequirementCreate',
-            component: () => import('@/views/work/WorkItemDetail'),
-            meta: { nav: 'DevelopLayout', appNav: 'ProjectWorkRequirement', title: '新建需求', workType: 'requirement' }
           }
         ]
       },
@@ -530,66 +446,6 @@ export const constantRoutes = [
             name: 'GroupMember',
             component: () => import('@/views/group/member'),
             meta: { nav: '/org', title: '项目组成员' }
-          },
-          {
-            path: '/group/:groupId/work/todo',
-            name: 'WorkTodo',
-            component: () => import('@/views/work/WorkItemList'),
-            meta: { nav: '/org', appNav: 'WorkTodo', title: '待办事项', workType: 'todo' }
-          },
-          {
-            path: '/group/:groupId/work/task',
-            name: 'WorkTask',
-            component: () => import('@/views/work/WorkItemList'),
-            meta: { nav: '/org', appNav: 'WorkTask', title: '工作任务', workType: 'task' }
-          },
-          {
-            path: '/group/:groupId/work/requirement',
-            name: 'WorkRequirement',
-            component: () => import('@/views/work/WorkItemList'),
-            meta: { nav: '/org', appNav: 'WorkRequirement', title: '需求清单', workType: 'requirement' }
-          },
-          {
-            path: '/group/:groupId/work/todo/:id',
-            name: 'WorkTodoDetail',
-            component: () => import('@/views/work/WorkItemDetail'),
-            meta: { nav: '/org', appNav: 'WorkTodo', title: '待办详情', workType: 'todo' }
-          },
-          {
-            path: '/group/:groupId/work/task/:id',
-            name: 'WorkTaskDetail',
-            component: () => import('@/views/work/WorkItemDetail'),
-            meta: { nav: '/org', appNav: 'WorkTask', title: '任务详情', workType: 'task' }
-          },
-          {
-            path: '/group/:groupId/work/requirement/:id',
-            name: 'WorkRequirementDetail',
-            component: () => import('@/views/work/WorkItemDetail'),
-            meta: { nav: '/org', appNav: 'WorkRequirement', title: '需求详情', workType: 'requirement' }
-          },
-          {
-            path: '/group/:groupId/work/calendar',
-            name: 'WorkCalendar',
-            component: () => import('@/views/work/WorkCalendar'),
-            meta: { nav: '/org', appNav: 'WorkCalendar', title: '日历' }
-          },
-          {
-            path: '/group/:groupId/work/todo/create',
-            name: 'WorkTodoCreate',
-            component: () => import('@/views/work/WorkItemDetail'),
-            meta: { nav: '/org', appNav: 'WorkTodo', title: '新建待办', workType: 'todo' }
-          },
-          {
-            path: '/group/:groupId/work/task/create',
-            name: 'WorkTaskCreate',
-            component: () => import('@/views/work/WorkItemDetail'),
-            meta: { nav: '/org', appNav: 'WorkTask', title: '新建任务', workType: 'task' }
-          },
-          {
-            path: '/group/:groupId/work/requirement/create',
-            name: 'WorkRequirementCreate',
-            component: () => import('@/views/work/WorkItemDetail'),
-            meta: { nav: '/org', appNav: 'WorkRequirement', title: '新建需求', workType: 'requirement' }
           }
         ]
       },

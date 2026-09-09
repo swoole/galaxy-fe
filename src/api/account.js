@@ -1,22 +1,5 @@
 import request from '@/utils/request'
 
-// 第三方登录帐号列表
-export function actThirdparties () {
-  return request({
-    url: 'account/thirdparty',
-    method: 'get'
-  })
-}
-
-// 第三方帐号解绑
-export function actThirdpartyUnbind (channel) {
-  return request({
-    url: 'account/thirdparty/unbind',
-    method: 'post',
-    data: { channel }
-  })
-}
-
 // 身份校验状态
 export function actIdauthStatus () {
   return request({

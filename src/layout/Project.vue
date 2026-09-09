@@ -37,16 +37,6 @@
           <menu-item :to="navTo('ProjectMonitoring')" index="ProjectMonitoring" icon="monitoring" title="监控" />
           <menu-item :to="navTo('ProjectRoutes')" index="ProjectRoutes" icon="route" title="路由规则" />
         </el-submenu>
-        <el-submenu index="sub-work" v-if="false">
-          <template slot="title">
-            <svg-icon icon-class="tree-table" />
-            <span>协作</span>
-          </template>
-          <menu-item :to="navTo('ProjectWorkTodo')" index="ProjectWorkTodo" icon="clipboard-check" title="待办事项" />
-          <menu-item :to="navTo('ProjectWorkTask')" index="ProjectWorkTask" icon="task" title="工作任务" />
-          <menu-item :to="navTo('ProjectWorkRequirement')" index="ProjectWorkRequirement" icon="list" title="需求清单" />
-          <menu-item :to="navTo('ProjectWorkCalendar')" index="ProjectWorkCalendar" icon="clock-fill" title="日历视图" />
-        </el-submenu>
         <el-submenu v-show="canManageProject" index="sub-settings">
           <template slot="title">
             <svg-icon icon-class="settings" />
@@ -102,11 +92,7 @@ export default {
         ProjectProfileEdit: 'sub-settings',
         ProjectMember: 'sub-settings',
         ProjectGovernance: 'sub-settings',
-        ProjectGithook: 'sub-settings',
-        ProjectWorkTodo: 'sub-work',
-        ProjectWorkTask: 'sub-work',
-        ProjectWorkRequirement: 'sub-work',
-        ProjectWorkCalendar: 'sub-work'
+        ProjectGithook: 'sub-settings'
       }
     }
   },

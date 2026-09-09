@@ -61,19 +61,6 @@
             </router-link>
           </div>
         </div>
-        <div class="el-divider el-divider--horizontal">
-          <div class="el-divider__text is-center form-divider">其他方式登录</div>
-        </div>
-        <div class="third-party-supports">
-          <el-tooltip
-            v-for="tp in thirdparties"
-            :key="tp.channel"
-            effect="dark"
-            :content="`使用${tp.name}登录`"
-            placement="bottom">
-            <svg-icon :icon-class="tp.icon" :title="tp.name" @click="goto(tp.redirect)" />
-          </el-tooltip>
-        </div>
       </el-form>
     </div>
     <union-captcha ref="captcha" @ready="() => captchaReady = true" />
@@ -81,10 +68,6 @@
 </template>
 
 <script>
-import { thirdpartySupports } from '@/api/auth'
-import {
-  TP_CONFIG
-} from '@/consts/user'
 import MixinLogin from './mixins/login'
 import ProjectLoginHeader from './components/LoginHeader'
 import UnionCaptcha from '@/views/components/UnionCaptcha.vue'
@@ -109,7 +92,6 @@ export default {
           { required: true, message: '密码不能为空', trigger: 'change' }
         ]
       },
-      thirdparties: [],
       captchaReady: false
     }
   },
@@ -125,10 +107,6 @@ export default {
       },
       immediate: true
     }
-  },
-  created () {
-    // 加载第三方登录列表
-    this.loadThirdpartySupports()
   },
   methods: {
     // 帐号密码登录
@@ -152,28 +130,6 @@ export default {
           })
         }, 'login')
       })
-    },
-    // 加载第三方登录列表
-    loadThirdpartySupports () {
-      thirdpartySupports().then(res => {
-        const thirdparties = []
-        res.data.supports.forEach(tp => {
-          if (!TP_CONFIG[tp.channel]) {
-            return null
-          }
-          thirdparties.push({
-            channel: tp.channel,
-            icon: TP_CONFIG[tp.channel].icon,
-            redirect: tp.login_url,
-            name: TP_CONFIG[tp.channel].name
-          })
-        })
-        this.thirdparties = thirdparties
-      })
-    },
-    // url跳转
-    goto (url) {
-      window.location.href = url
     }
   }
 }
@@ -200,7 +156,7 @@ export default {
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     border-radius: 3px;
     width: 380px;
-    height: 450px;
+    height: 380px;
     position: absolute;
     top: -100px;
     left: 0;
@@ -236,14 +192,6 @@ export default {
       }
       .form-divider {
         color: #909399;
-      }
-    }
-    .third-party-supports {
-      svg {
-        height: 32px;
-        width: 32px;
-        margin-right: 20px;
-        cursor: pointer;
       }
     }
   }
