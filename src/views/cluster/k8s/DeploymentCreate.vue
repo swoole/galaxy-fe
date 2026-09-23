@@ -40,7 +40,7 @@
               <el-input v-model="c.name" placeholder="container name" />
             </el-form-item>
             <el-form-item label="镜像" label-width="70px" required>
-              <el-input v-model="c.image" placeholder="如 nginx:1.25" />
+              <el-input v-model="c.image" placeholder="如 registry.cn-shanghai.aliyuncs.com/swoole-public/nginx:1.27-alpine" />
             </el-form-item>
             <el-form-item label="端口" label-width="70px">
               <div v-for="(p, pi) in c.ports" :key="pi" class="port-row">

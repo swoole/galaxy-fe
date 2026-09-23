@@ -302,7 +302,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="源镜像" prop="source_image">
-          <el-input v-model.trim="mappingForm.source_image" placeholder="例如 prom/node-exporter:v1.8.2" />
+          <el-input v-model.trim="mappingForm.source_image" placeholder="例如 registry.cn-shanghai.aliyuncs.com/swoole-public/node-exporter:v1.8.2" />
           <div class="little-tips">填写产品或应用声明的上游标准镜像，必须精确匹配。</div>
         </el-form-item>
         <el-form-item label="目标镜像" prop="target_image">

@@ -438,7 +438,7 @@ const serverBlank = () => ({
   dashboard_user: '',
   dashboard_password: '',
   dashboard_password_configured: false,
-  image: 'fatedier/frps:v0.69.0',
+  image: 'registry.cn-shanghai.aliyuncs.com/swoole-public/frps:v0.69.0',
   namespace: 'galaxy-frp',
   auth_token: ''
 })
@@ -449,7 +449,7 @@ const clientBlank = () => ({
   deployment_mode: 'managed',
   cluster_id: null,
   frp_user: '',
-  image: 'fatedier/frpc:v0.69.0',
+  image: 'registry.cn-shanghai.aliyuncs.com/swoole-public/frpc:v0.69.0',
   namespace: 'galaxy-frp'
 })
 const ruleBlank = () => ({

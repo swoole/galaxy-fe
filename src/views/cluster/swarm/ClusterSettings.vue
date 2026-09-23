@@ -101,8 +101,8 @@
             </div>
             <el-form ref="gateway-form" :model="form" :rules="rules" label-width="160px" @submit.native.prevent="deploy">
               <el-form-item label="网关实现"><el-input value="Traefik Proxy" disabled class="form-control" /></el-form-item>
-              <el-form-item label="Docker 镜像" prop="image"><el-input v-model.trim="form.image" class="form-control" placeholder="traefik:v3.7" /><div class="form-help">建议固定具体版本，更新镜像后会滚动更新 Service。</div></el-form-item>
-              <el-form-item label="Socket Proxy 镜像" prop="socket_proxy_image"><el-input v-model.trim="form.socket_proxy_image" class="form-control" placeholder="tecnativa/docker-socket-proxy:latest" /><div class="form-help">Traefik 不直接接触 docker.sock；代理只开放服务发现所需的只读 Docker API。</div></el-form-item>
+              <el-form-item label="Docker 镜像" prop="image"><el-input v-model.trim="form.image" class="form-control" placeholder="registry.cn-shanghai.aliyuncs.com/swoole-public/traefik:v3.7" /><div class="form-help">建议固定具体版本，更新镜像后会滚动更新 Service。</div></el-form-item>
+              <el-form-item label="Socket Proxy 镜像" prop="socket_proxy_image"><el-input v-model.trim="form.socket_proxy_image" class="form-control" placeholder="registry.cn-shanghai.aliyuncs.com/swoole-public/docker-socket-proxy:latest" /><div class="form-help">Traefik 不直接接触 docker.sock；代理只开放服务发现所需的只读 Docker API。</div></el-form-item>
               <el-form-item label="共享 Overlay 网络" prop="network_name"><el-input v-model.trim="form.network_name" class="form-control" :disabled="installed" /><div class="form-help">网关与需要域名访问的项目必须加入该网络；安装后不允许直接改名。</div></el-form-item>
               <el-form-item label="网关控制网络" prop="control_network_name"><el-input v-model.trim="form.control_network_name" class="form-control" :disabled="installed" /><div class="form-help">仅连接 Traefik 与 Socket Proxy，用于隔离 Docker API 服务发现通道。</div></el-form-item>
               <el-form-item label="发布模式" prop="publish_mode"><el-radio-group v-model="form.publish_mode"><el-radio label="ingress">Ingress Routing Mesh</el-radio><el-radio label="host">Host 端口</el-radio></el-radio-group><div class="form-help">Ingress 可通过任意 Swarm 节点访问；Host 只在实际运行 Traefik 的 Manager 节点监听。</div></el-form-item>
@@ -274,13 +274,13 @@ export default {
       joinAddress: '',
       joinAddressOptions: [],
       prometheusForm: {
-        image: 'prom/prometheus:v3.2.1',
+        image: 'registry.cn-shanghai.aliyuncs.com/swoole-public/prometheus:v3.2.1',
         scrape_interval: 15,
         retention_days: 15
       },
       form: {
-        image: 'traefik:v3.7',
-        socket_proxy_image: 'tecnativa/docker-socket-proxy:latest',
+        image: 'registry.cn-shanghai.aliyuncs.com/swoole-public/traefik:v3.7',
+        socket_proxy_image: 'registry.cn-shanghai.aliyuncs.com/swoole-public/docker-socket-proxy:latest',
         network_name: 'galaxy-web',
         control_network_name: 'galaxy-web-control',
         http_port: 80,

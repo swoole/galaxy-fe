@@ -1,4 +1,4 @@
-FROM node:14-alpine as builder
+FROM registry.cn-shanghai.aliyuncs.com/swoole-public/node:14-alpine as builder
 
 ARG baseapi
 ARG staticprefix
@@ -20,7 +20,7 @@ RUN set -ex \
     && npm run build
 
 
-FROM nginx:stable
+FROM registry.cn-shanghai.aliyuncs.com/swoole-public/nginx:stable
 
 COPY --from=builder /workspace/dist /usr/share/nginx/html
 

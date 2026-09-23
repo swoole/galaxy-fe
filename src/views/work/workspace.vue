@@ -184,7 +184,7 @@ export default {
       return workspaceOptions(this.orgId, this.groupId, this.userId).then(res => {
         this.options = res.data || { clusters: [], defaults: {} }
         const defaults = this.options.defaults || {}
-        this.form.image = defaults.image || 'codegalaxy/workspace:2026.07'
+        this.form.image = defaults.image || 'registry.cn-shanghai.aliyuncs.com/swoole-public/workspace:2026.07'
         this.form.cpu = defaults.cpu || 500
         this.form.memory = defaults.memory || 1024
         this.form.mode = defaults.mode || 'web-ide'
