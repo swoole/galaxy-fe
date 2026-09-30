@@ -8,7 +8,6 @@
         class="nav-menu-container"
         ref="menu">
         <menu-item :to="navTo('ProjectOverview')" index="ProjectOverview" icon="dashboard" title="概览" />
-        <menu-item :to="navTo('ProjectProfile')" index="ProjectProfile" icon="template" title="详情" />
         <el-submenu v-show="Number(projectProfile.develop)" index="sub-code">
           <template slot="title">
             <svg-icon icon-class="code2" />
@@ -20,11 +19,11 @@
         <el-submenu index="sub-build">
           <template slot="title">
             <svg-icon icon-class="package" />
-            <span>构建</span>
+            <span>镜像</span>
           </template>
           <menu-item v-show="Number(projectProfile.develop)" :to="navTo('ProjectPipeline')" index="ProjectPipeline" icon="workflow" title="流水线" />
           <menu-item :to="navTo('ProjectBuild')" index="ProjectBuild" icon="task" title="构建记录" />
-          <menu-item :to="navTo('ProjectArtifacts')" index="ProjectArtifacts" icon="layers" title="镜像产物" />
+          <menu-item :to="navTo('ProjectArtifacts')" index="ProjectArtifacts" icon="layers" title="镜像制品" />
         </el-submenu>
         <el-submenu index="sub-deploy">
           <template slot="title">
@@ -33,24 +32,31 @@
           </template>
           <menu-item :to="navTo('ProjectConfiguration')" index="ProjectConfiguration" icon="sliders-horizontal" title="配置中心" />
           <menu-item :to="navTo('ProjectDeploy')" index="ProjectDeploy" icon="server" title="部署记录" />
-          <menu-item :to="navTo('ProjectInstance')" index="ProjectInstance" icon="docker" title="实例" />
-          <menu-item :to="navTo('ProjectMonitoring')" index="ProjectMonitoring" icon="monitoring" title="监控" />
+          <menu-item :to="navTo('ProjectInstance')" index="ProjectInstance" icon="docker" title="运行实例" />
+          <menu-item :to="navTo('ProjectMonitoring')" index="ProjectMonitoring" icon="monitoring" title="监控与告警" />
           <menu-item :to="navTo('ProjectRoutes')" index="ProjectRoutes" icon="route" title="路由规则" />
         </el-submenu>
-        <el-submenu v-show="canManageProject" index="sub-settings">
+        <el-submenu index="sub-settings">
           <template slot="title">
             <svg-icon icon-class="settings" />
             <span>设置</span>
           </template>
-          <menu-item :to="navTo('ProjectProfileEdit')" index="ProjectProfileEdit" icon="edit" title="设置" />
-          <menu-item :to="navTo('ProjectMember')" index="ProjectMember" icon="users" title="成员" />
-          <menu-item :to="navTo('ProjectGovernance')" index="ProjectGovernance" icon="clipboard-check" title="操作记录" />
-          <menu-item v-show="Number(projectProfile.develop)" :to="navTo('ProjectGithook')" index="ProjectGithook" icon="webhook" title="Git 钩子" />
+          <menu-item :to="navTo('ProjectProfile')" index="ProjectProfile" icon="template" title="项目信息" />
+          <menu-item v-show="canManageProject" :to="navTo('ProjectProfileEdit')" index="ProjectProfileEdit" icon="edit" title="项目设置" />
+          <menu-item v-show="canManageProject" :to="navTo('ProjectMember')" index="ProjectMember" icon="users" title="成员管理" />
+          <menu-item v-show="canManageProject" :to="navTo('ProjectGovernance')" index="ProjectGovernance" icon="clipboard-check" title="操作记录" />
+          <menu-item v-show="canManageProject && Number(projectProfile.develop)" :to="navTo('ProjectGithook')" index="ProjectGithook" icon="webhook" title="Git 钩子" />
         </el-submenu>
       </el-menu>
     </div>
     <div class="myapp-layout-main">
-      <router-view :key="routerKey" :project="projectProfile" :projectId="projectId" :groupId="groupId" :orgId="orgId" />
+      <router-view
+        v-if="projectProfile.id"
+        :key="routerKey"
+        :project="projectProfile"
+        :projectId="projectId"
+        :groupId="groupId"
+        :orgId="orgId" />
     </div>
   </div>
 </template>
@@ -89,6 +95,7 @@ export default {
         ProjectSwarmContainerDetail: 'sub-deploy',
         ProjectMonitoring: 'sub-deploy',
         ProjectRoutes: 'sub-deploy',
+        ProjectProfile: 'sub-settings',
         ProjectProfileEdit: 'sub-settings',
         ProjectMember: 'sub-settings',
         ProjectGovernance: 'sub-settings',
@@ -124,7 +131,7 @@ export default {
     defaultOpened () {
       return this.currentSubmenu ? [this.currentSubmenu] : []
     },
-    // 是否有项目管理权限（控制“设置”分组显隐）
+    // 是否有项目管理权限（控制“设置”中的管理操作显隐）
     canManageProject () {
       return this.$p('project.update', this.projectProfile.org_role, this.projectProfile.group_role, this.projectProfile.role)
     }

@@ -2,29 +2,29 @@
   <div class="project-container">
     <breadcrumb :breadcrumb="breadcrumb" :project="project" />
     <el-card shadow="never" class="build-card">
-        <div slot="header" class="page-header">
-          <div>
-            <h3>镜像制品与构建</h3>
-            <p>从确定的代码版本生成可追溯、可部署的 OCI 镜像</p>
-          </div>
-          <div v-if="$p('project.no_viewer', project.org_role, project.group_role, project.role)" class="header-actions">
-            <el-button v-if="project.develop" type="primary" size="small" icon="el-icon-plus" @click="openBuild">新建构建</el-button>
-          </div>
+      <div slot="header" class="page-header">
+        <div>
+          <h3>构建记录</h3>
+          <p>从确定的代码版本生成可追溯、可部署的 OCI 镜像</p>
         </div>
+        <div v-if="$p('project.no_viewer', project.org_role, project.group_role, project.role)" class="header-actions">
+          <el-button v-if="project.develop" type="primary" size="small" icon="el-icon-plus" @click="openBuild">新建构建</el-button>
+        </div>
+      </div>
 
-        <div class="filter-bar">
-          <div class="filters">
-            <el-select v-model="filters.pipeline_id" clearable size="small" placeholder="全部流水线" @change="search">
+      <div class="filter-bar">
+        <div class="filters">
+          <el-select v-model="filters.pipeline_id" clearable size="small" placeholder="全部流水线" @change="search">
             <el-option v-for="item in pipelines" :key="item.id" :label="item.title" :value="item.id" />
-            </el-select>
-            <el-select v-model="filters.status" clearable size="small" placeholder="全部状态" @change="search">
+          </el-select>
+          <el-select v-model="filters.status" clearable size="small" placeholder="全部状态" @change="search">
             <el-option v-for="(item, status) in statuses" :key="status" :label="item.label" :value="Number(status)" />
-            </el-select>
-          </div>
-          <span class="result-count">共 {{ total }} 个构建任务</span>
+          </el-select>
         </div>
+        <span class="result-count">共 {{ total }} 个构建任务</span>
+      </div>
 
-        <el-table v-loading="loading" :data="rows" fit class="build-table" empty-text="暂无构建任务">
+      <el-table v-loading="loading" :data="rows" fit class="build-table" empty-text="暂无构建任务">
         <el-table-column label="任务" width="92">
           <template #default="{ row }">
             <el-link class="task-id" type="primary" :underline="false" @click="showLog(row)">#{{ row.id }}</el-link>
@@ -38,7 +38,8 @@
         </el-table-column>
         <el-table-column label="流水线" min-width="145">
           <template #default="{ row }">
-            {{ row.executor === 'external-image' ? 'Registry 导入' : (row.pipeline ? row.pipeline.title : `#${row.pipeline_id}`) }}
+            <router-link v-if="row.pipeline" :to="{ name: 'ProjectPipelineProfile', params: { groupId, projectId, pipelineId: row.pipeline.id } }" class="text-link">{{ row.pipeline.title }}</router-link>
+            <span v-else>{{ row.executor === 'external-image' ? 'Registry 导入' : `#${row.pipeline_id}` }}</span>
             <el-tag v-if="row.pipeline && row.pipeline.archived_at" size="mini" type="info">已归档</el-tag>
           </template>
         </el-table-column>
@@ -91,14 +92,14 @@
             </template>
           </template>
         </el-table-column>
-        </el-table>
-        <pagination
-          v-show="total > 0"
-          :total="total"
-          :page.sync="page"
-          :limit.sync="pageSize"
-          @pagination="load" />
-      </el-card>
+      </el-table>
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        :page.sync="page"
+        :limit.sync="pageSize"
+        @pagination="load" />
+    </el-card>
 
     <el-dialog title="新建镜像构建" :visible.sync="buildVisible" width="620px" @closed="resetBuildForm">
       <el-alert
@@ -106,53 +107,53 @@
         type="info"
         :closable="false"
         show-icon />
-      <el-form ref="buildForm" :model="buildForm" :rules="buildRules" label-width="90px" class="build-form">
+      <el-form ref="buildForm" :model="buildForm" :rules="buildRules" label-width="105px" class="build-form">
         <el-form-item label="流水线" prop="pipeline_id">
           <el-select v-model="buildForm.pipeline_id" placeholder="请选择 BuildKit 流水线" style="width: 100%">
             <el-option v-for="item in pipelines" :key="item.id" :label="item.title" :value="item.id" />
           </el-select>
         </el-form-item>
         <template v-if="referenceMode === 'provider'">
-        <el-form-item label="版本来源">
-          <el-radio-group v-model="buildForm.revision_type" @change="providerRevisionTypeChanged">
-            <el-radio-button label="commit">分支 Commit</el-radio-button>
-            <el-radio-button label="tag">Git Tag</el-radio-button>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item v-if="buildForm.revision_type === 'commit'" label="Git 分支" prop="branch">
-          <div class="reference-select">
-            <el-select v-model="buildForm.branch" :loading="branchesLoading" filterable placeholder="请选择分支" @change="selectBranch">
-              <el-option v-for="item in branches" :key="branchValue(item)" :label="branchLabel(item)" :value="branchValue(item)" />
-            </el-select>
-            <el-button icon="el-icon-refresh" :loading="branchesLoading" title="通过 Git Provider API 刷新" @click="loadReferences(true)" />
-          </div>
-        </el-form-item>
-        <el-form-item v-if="buildForm.revision_type === 'commit'" label="Git Commit" prop="commit_id">
-          <div class="reference-select">
-            <el-select
-              v-model="buildForm.commit_id"
-              :loading="commitsLoading"
-              filterable
-              placeholder="请选择确定版本"
-              @change="selectCommit">
-              <el-option
-                v-for="item in commits"
-                :key="commitValue(item)"
-                :label="commitLabel(item)"
-                :value="commitValue(item)" />
-            </el-select>
-            <el-button icon="el-icon-refresh" :disabled="!buildForm.branch" :loading="commitsLoading" title="从远程仓库刷新提交" @click="loadCommits(true)" />
-          </div>
-        </el-form-item>
-        <el-form-item v-else label="Git Tag" prop="branch">
-          <div class="reference-select">
-            <el-select v-model="buildForm.branch" :loading="branchesLoading" filterable placeholder="请选择 Tag" @change="selectTag">
-              <el-option v-for="item in tags" :key="branchValue(item)" :label="branchLabel(item)" :value="branchValue(item)" />
-            </el-select>
-            <el-button icon="el-icon-refresh" :loading="branchesLoading" title="通过 Git Provider API 刷新" @click="loadReferences(true)" />
-          </div>
-          <div v-if="buildForm.branch" class="reference-hint">构建时会将该 Tag 冻结为实际 Commit SHA，后续重新构建不会受 Tag 移动影响。</div>
-        </el-form-item>
+          <el-form-item label="版本来源">
+            <el-radio-group v-model="buildForm.revision_type" @change="providerRevisionTypeChanged">
+              <el-radio-button label="commit">分支 Commit</el-radio-button>
+              <el-radio-button label="tag">Git Tag</el-radio-button>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item v-if="buildForm.revision_type === 'commit'" label="Git 分支" prop="branch">
+            <div class="reference-select">
+              <el-select v-model="buildForm.branch" :loading="branchesLoading" filterable placeholder="请选择分支" @change="selectBranch">
+                <el-option v-for="item in branches" :key="branchValue(item)" :label="branchLabel(item)" :value="branchValue(item)" />
+              </el-select>
+              <el-button icon="el-icon-refresh" :loading="branchesLoading" title="通过 Git Provider API 刷新" @click="loadReferences(true)" />
+            </div>
+          </el-form-item>
+          <el-form-item v-if="buildForm.revision_type === 'commit'" label="Git Commit" prop="commit_id">
+            <div class="reference-select">
+              <el-select
+                v-model="buildForm.commit_id"
+                :loading="commitsLoading"
+                filterable
+                placeholder="请选择确定版本"
+                @change="selectCommit">
+                <el-option
+                  v-for="item in commits"
+                  :key="commitValue(item)"
+                  :label="commitLabel(item)"
+                  :value="commitValue(item)" />
+              </el-select>
+              <el-button icon="el-icon-refresh" :disabled="!buildForm.branch" :loading="commitsLoading" title="从远程仓库刷新提交" @click="loadCommits(true)" />
+            </div>
+          </el-form-item>
+          <el-form-item v-else label="Git Tag" prop="branch">
+            <div class="reference-select">
+              <el-select v-model="buildForm.branch" :loading="branchesLoading" filterable placeholder="请选择 Tag" @change="selectTag">
+                <el-option v-for="item in tags" :key="branchValue(item)" :label="branchLabel(item)" :value="branchValue(item)" />
+              </el-select>
+              <el-button icon="el-icon-refresh" :loading="branchesLoading" title="通过 Git Provider API 刷新" @click="loadReferences(true)" />
+            </div>
+            <div v-if="buildForm.branch" class="reference-hint">构建时会将该 Tag 冻结为实际 Commit SHA，后续重新构建不会受 Tag 移动影响。</div>
+          </el-form-item>
         </template>
         <template v-else>
           <el-alert class="manual-reference-tip" type="info" :closable="false" title="当前用户未配置匹配此仓库的 Git Provider Token；Galaxy 不会访问仓库，请手工填写版本。" />
@@ -235,14 +236,20 @@ export default {
   },
   computed: {
     breadcrumb () {
-      return [...routeBreadcrumb(this), { title: '构建', to: '' }, { title: '构建记录', to: '' }]
+      return [...routeBreadcrumb(this), { title: '构建记录', to: '' }]
     }
   },
   created () {
     const pipelineId = Number(this.$route.query.pipeline_id || 0)
     this.filters.pipeline_id = pipelineId || null
-    this.loadPipelines()
+    this.loadPipelines().then(() => {
+      if (this.$route.query.action === 'build' && Number(this.project.develop) && this.$p('project.no_viewer', this.project.org_role, this.project.group_role, this.project.role)) this.openBuild()
+    })
     this.load()
+  },
+  mounted () {
+    const buildId = Number(this.$route.query.build || 0)
+    if (buildId) this.$refs.buildLog.show(this.groupId, this.projectId, buildId)
   },
   beforeDestroy () {
     this.clearRefresh()

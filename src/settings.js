@@ -11,8 +11,8 @@ module.exports = {
   officialWebsite: 'https://code-galaxy.net',
 
   // 重定向外域可信域名
-  trustedDomains: (process.env.VUE_APP_TRUSTED_DOMAINS || '*.code-galaxy.net').split(','),
+  trustedDomains: (process.env.VUE_APP_TRUSTED_DOMAINS || '').split(',').filter(Boolean),
 
   // 设置跨域cookie的域名
-  cookieDomain: process.env.VUE_APP_COOKIE_DOMAIN || '*.code-galaxy.net'
+  cookieDomain: process.env.VUE_APP_COOKIE_DOMAIN || ''
 }

@@ -4,8 +4,8 @@
     <el-card shadow="never" class="deploy-card">
       <div slot="header" class="page-header">
         <div>
-          <h3>项目发布</h3>
-          <p>将不可变镜像制品发布为 Docker Swarm Service 或 Kubernetes Deployment，并跟踪每次变更</p>
+          <h3>部署记录</h3>
+          <p>从镜像制品部署到目标环境，跟踪版本、状态与回滚记录</p>
         </div>
         <el-button
           v-if="$p('project.no_viewer', project.org_role, project.group_role, project.role)"
@@ -313,6 +313,16 @@
           <el-descriptions-item label="资源名称"><span class="mono">{{ workloadResourceName(detail) }}</span></el-descriptions-item>
           <el-descriptions-item label="Namespace">{{ workloadNamespace(detail) }}</el-descriptions-item>
           <el-descriptions-item label="资源引用" :span="2"><span class="mono">{{ detail.runtime_ref || '-' }}</span></el-descriptions-item>
+          <el-descriptions-item label="镜像制品" :span="2">
+            <el-link v-if="detail.artifact" type="primary" @click="showImage(detail.artifact)">{{ detail.artifact.reference }}</el-link>
+            <span v-else>制品已移除</span>
+          </el-descriptions-item>
+          <el-descriptions-item v-if="detail.artifact && detail.artifact.build_id" label="来源构建">
+            <router-link :to="{ name: 'ProjectBuild', params: { groupId, projectId }, query: { build: detail.artifact.build_id } }" class="text-link">#{{ detail.artifact.build_id }}</router-link>
+          </el-descriptions-item>
+          <el-descriptions-item v-if="detail.runtime" label="运行实例">
+            <router-link :to="{ name: 'ProjectInstance', params: { groupId, projectId } }" class="text-link">{{ detail.runtime.name || '查看实例' }}</router-link>
+          </el-descriptions-item>
           <el-descriptions-item label="执行耗时">{{ duration(detail) }}</el-descriptions-item>
         </el-descriptions>
         <h4>期望配置（不包含 Secret 明文）</h4>
@@ -415,7 +425,7 @@ export default {
     }
   },
   computed: {
-    breadcrumb () { return [...routeBreadcrumb(this), { title: '部署', to: '' }, { title: '项目发布', to: '' }] },
+    breadcrumb () { return [...routeBreadcrumb(this), { title: '部署记录', to: '' }] },
     deploymentResources: {
       get () {
         return {
@@ -468,8 +478,10 @@ export default {
     releaseOptions(this.orgId, this.groupId, this.projectId).then(res => {
       this.options = res.data
       const artifactId = Number(this.$route.query.artifact || 0)
-      if (artifactId) this.$nextTick(() => this.openCreate(artifactId))
+      if (this.$p('project.no_viewer', this.project.org_role, this.project.group_role, this.project.role) && (artifactId || this.$route.query.action === 'create')) this.$nextTick(() => this.openCreate(artifactId || null))
     })
+    const releaseId = Number(this.$route.query.release || 0)
+    if (releaseId) this.showDetail({ id: releaseId })
     this.load()
   },
   beforeDestroy () { this.clearRefresh() },

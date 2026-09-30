@@ -1,8 +1,11 @@
 <template>
-  <div class="project-container">
+  <div class="project-container" v-loading="profileLoading">
     <breadcrumb :breadcrumb="breadcrumb" :project="project" />
 
     <div class="project-main">
+      <el-alert v-if="profileError" title="项目信息加载失败" type="error" :closable="false" show-icon>
+        <el-button type="text" @click="loadProfile">重新加载</el-button>
+      </el-alert>
       <easy-title title="基本信息" margin-set="0 20" />
       <div style="margin-bottom: 10px">
         <router-link v-if="$p('project.update', project.org_role, project.group_role, project.role)" :to="{ name: 'ProjectProfileEdit', params: { groupId, projectId } }">
@@ -37,22 +40,6 @@
       <el-descriptions direction="vertical" :column="1" :colon="false" labelClassName="desc-label" contentClassName="desc-content">
         <el-descriptions-item label="项目描述">
           {{ profile.desc }}
-        </el-descriptions-item>
-      </el-descriptions>
-
-      <easy-title title="项目概览" margin-set="20 20" />
-      <el-descriptions direction="vertical" :column="3" :colon="false" labelClassName="desc-label" contentClassName="desc-content">
-        <el-descriptions-item label="成员数量">
-          {{ profile.member_count }}
-        </el-descriptions-item>
-        <el-descriptions-item label="上次活跃时间">
-          {{ profile.last_active | formatDate }}
-        </el-descriptions-item>
-        <el-descriptions-item label="实例">
-          <router-link :to="{ name: 'ProjectInstance', params: { projectId, groupId } }" class="text-link">
-            {{ profile.instances }}
-          </router-link>
-          个实例
         </el-descriptions-item>
       </el-descriptions>
 
@@ -254,6 +241,8 @@ export default {
         develop: false,
         registries: []
       },
+      profileLoading: false,
+      profileError: false,
       deleteLoading: false,
       deleteOverview: {},
       dialogDeleteVisible: false,
@@ -280,7 +269,6 @@ export default {
     breadcrumb () {
       return [
         ...routeBreadcrumb(this),
-        { title: '项目信息', to: '' },
         { title: this.$route.meta.title, to: '' }
       ]
     }
@@ -291,11 +279,12 @@ export default {
   methods: {
     // 加载项目详情
     loadProfile () {
-      const loading = this.$loading()
+      this.profileLoading = true
+      this.profileError = false
       projectProfile(this.orgId, this.groupId, this.projectId, 1).then(res => {
         this.profile = res.data.project
-      }).finally(() => {
-        loading.close()
+      }).catch(() => { this.profileError = true }).finally(() => {
+        this.profileLoading = false
       })
     },
     // 退出项目

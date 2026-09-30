@@ -29,8 +29,16 @@
               :value="row.release.artifact.reference"
               :digest="row.release.artifact.digest || ''"
               :size="row.release.artifact.size || 0"
+              clickable
+              @click="openImage(row.release.artifact)"
               compact />
             <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="来源部署" width="105">
+          <template #default="{ row }">
+            <router-link v-if="row.release" :to="{ name: 'ProjectDeploy', params: { groupId, projectId }, query: { release: row.release.id } }" class="text-link">#{{ row.release.id }}</router-link>
+            <span v-else class="secondary">外部导入</span>
           </template>
         </el-table-column>
         <el-table-column label="副本" width="110" align="center">
@@ -119,6 +127,9 @@ export default {
     load () {
       this.loading = true
       return projectRuntimes(this.orgId, this.groupId, this.projectId).then(res => { this.rows = res.data.runtimes || [] }).finally(() => { this.loading = false })
+    },
+    openImage (artifact) {
+      this.$router.push({ name: 'ProjectImageDetail', params: { groupId: this.groupId, projectId: this.projectId, artifactId: artifact.id } })
     },
     openWorkload (row) {
       if (!row.runtime_ref) return this.$message.warning('该实例尚未关联运行时工作负载')

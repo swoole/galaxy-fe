@@ -1,148 +1,60 @@
 <template>
-  <div class="project-container">
+  <div class="project-container project-overview">
     <breadcrumb :breadcrumb="breadcrumb" :project="project" />
-    <div class="project-main" v-loading="loading">
-      <section :class="['status-hero', `status-${readinessType}`]">
-        <div class="status-icon"><i :class="readinessIcon"></i></div>
-        <div class="status-copy">
-          <div class="eyebrow">项目状态</div>
-          <h2>{{ readinessMessage }}</h2>
-          <div class="status-meta">
-            最近活动 {{ lastActivity }} · {{ overview.member.count }} 位成员
-          </div>
+    <div class="overview-content">
+      <div class="overview-toolbar">
+        <h2 class="overview-title">概览</h2>
+        <div v-if="canOperate" class="toolbar-actions">
+          <router-link v-if="isSource" :to="{ path: r('build'), query: { action: 'build' } }"><el-button size="small" icon="el-icon-video-play">发起构建</el-button></router-link>
+          <router-link :to="{ path: r('deploy'), query: { action: 'create' } }"><el-button size="small" type="primary" icon="el-icon-upload2">新建部署</el-button></router-link>
         </div>
-        <el-tag :type="readinessTagType" effect="dark">{{ readinessLabel }}</el-tag>
-      </section>
-
-      <easy-title title="关键链路" margin-set="28 16" />
-      <div class="primary-grid">
-        <router-link v-loading="sourceLoading" :to="sourceRoute" class="feature-card source-card">
-          <div class="feature-icon"><i :class="project.develop ? 'el-icon-connection' : 'el-icon-box'"></i></div>
-          <div class="feature-body">
-            <span class="feature-label">{{ project.develop ? 'Git 提交次数' : '镜像来源' }}</span>
-            <strong v-if="project.develop">
-              {{ commitCount }} <em v-if="overview.source.commit_count_available">次</em>
-            </strong>
-            <strong v-else>{{ sourceStatus }}</strong>
-            <small>{{ sourceFooter }}</small>
-          </div>
-          <i class="el-icon-arrow-right feature-arrow"></i>
-        </router-link>
-
-        <router-link :to="r('build/artifacts')" class="feature-card delivery-card">
-          <div class="feature-icon"><i class="el-icon-cpu"></i></div>
-          <div class="feature-body">
-            <span class="feature-label">构建与制品</span>
-            <strong>{{ overview.artifact.total }} <em>个制品</em></strong>
-            <small>构建 {{ overview.build.total }} · 成功 {{ overview.build.succeeded }} · 失败 {{ overview.build.failed }}</small>
-          </div>
-          <i class="el-icon-arrow-right feature-arrow"></i>
-        </router-link>
-
-        <router-link :to="r('instance')" class="feature-card runtime-card">
-          <div class="feature-icon"><i class="el-icon-s-platform"></i></div>
-          <div class="feature-body">
-            <span class="feature-label">运行状态</span>
-            <strong>{{ overview.runtime.services }} <em>个实例</em></strong>
-            <small>副本 {{ overview.runtime.running_replicas }}/{{ overview.runtime.desired_replicas }} · 异常 {{ overview.runtime.unhealthy }}</small>
-          </div>
-          <i class="el-icon-arrow-right feature-arrow"></i>
-        </router-link>
       </div>
-
-      <div class="quick-strip">
-        <router-link v-if="project.develop" :to="r('pipeline')" class="quick-item">
-          <i class="el-icon-share"></i><span>有效流水线</span><strong>{{ overview.pipeline.active }}</strong>
-          <small>归档 {{ overview.pipeline.archived }}</small>
-        </router-link>
-        <router-link :to="r('routes')" class="quick-item">
-          <i class="el-icon-guide"></i><span>启用路由</span><strong>{{ overview.route.enabled }}/{{ overview.route.total }}</strong>
-          <small>HTTPS {{ overview.route.tls }}</small>
-        </router-link>
-        <router-link :to="r('deploy')" class="quick-item">
-          <i class="el-icon-upload2"></i><span>累计发布</span><strong>{{ overview.release.total }}</strong>
-          <small>执行中 {{ overview.release.deploying }}</small>
-        </router-link>
-        <router-link :to="r('member')" class="quick-item">
-          <i class="el-icon-user"></i><span>项目成员</span><strong>{{ overview.member.count }}</strong>
-          <small>协作成员</small>
-        </router-link>
-      </div>
-
-      <easy-title title="最近 30 天交付" margin-set="30 16" />
-      <div class="delivery-grid">
-        <router-link :to="r('build')" class="delivery-panel build-panel">
-          <div class="panel-copy">
-            <div class="panel-heading">
-              <div><i class="el-icon-set-up"></i><span>构建</span></div>
-              <strong>{{ delivery.builds.total }}<small> 次</small></strong>
-            </div>
-            <div class="panel-caption">最近 30 天共成功构建 {{ delivery.builds.succeeded }} 次</div>
-            <div class="panel-link">查看构建记录 <i class="el-icon-arrow-right"></i></div>
+      <div id="delivery-view">
+        <el-alert v-if="overviewError" title="项目状态加载失败" type="error" :closable="false" show-icon>
+          <el-button type="text" @click="load">重新加载</el-button>
+        </el-alert>
+        <section v-if="overviewLoaded && !overviewError" :class="['status-banner', `status-${readinessType}`]">
+          <i :class="readinessIcon"></i>
+          <div class="status-copy"><strong>{{ readinessLabel }}</strong><span>{{ readinessMessage }}</span></div>
+          <router-link v-if="canOperate || readinessType === 'success'" :to="nextAction.to" class="inline-link">{{ nextAction.label }} <i class="el-icon-arrow-right"></i></router-link>
+        </section>
+        <section v-loading="loading" class="overview-panel chain-panel">
+          <div class="section-heading"><h3>交付链路</h3><div class="project-meta">
+            <router-link :to="r('member')">{{ overviewLoaded && !overviewError ? `${overview.member.count} 位成员` : '项目成员' }}</router-link>
+            <span>最近活动 {{ overviewLoaded && !overviewError ? lastActivity : '—' }}</span>
+          </div></div>
+          <div class="delivery-chain">
+            <router-link v-for="(stage, index) in stages" :key="stage.title" :to="stage.to" :class="['chain-stage', stage.state]">
+              <div class="stage-heading"><span class="stage-number">{{ index + 1 }}</span><span>{{ stage.title }}</span><i :class="stage.icon"></i></div>
+              <strong>{{ overviewLoaded && !overviewError ? stage.value : '—' }}</strong>
+              <small>{{ overviewLoaded && !overviewError ? stage.note : '等待加载' }}</small>
+              <i v-if="index < stages.length - 1" class="el-icon-arrow-right chain-arrow"></i>
+            </router-link>
           </div>
-          <el-progress
-            type="circle"
-            :percentage="percentage(delivery.builds.success_rate)"
-            :width="106"
-            :stroke-width="8"
-            :format="progressFormat"
-            color="#409eff" />
-        </router-link>
-        <router-link :to="r('deploy')" class="delivery-panel release-panel">
-          <div class="panel-copy">
-            <div class="panel-heading">
-              <div><i class="el-icon-position"></i><span>发布</span></div>
-              <strong>{{ delivery.releases.total }}<small> 次</small></strong>
-            </div>
-            <div class="panel-caption">
-              部署 {{ delivery.releases.deploys }} 次 · 回滚 {{ delivery.releases.rollbacks }} 次
-            </div>
-            <div class="panel-link">查看发布记录 <i class="el-icon-arrow-right"></i></div>
+          <div class="chain-support">
+            <router-link :to="r('configuration')"><i class="el-icon-set-up"></i> 配置中心 <span>为部署提供环境变量与密钥</span></router-link>
+            <router-link :to="r('routes')"><i class="el-icon-guide"></i> 访问路由 <span>{{ overviewLoaded && !overviewError ? `${overview.route.enabled} 条已启用` : '—' }}</span></router-link>
           </div>
-          <el-progress
-            type="circle"
-            :percentage="percentage(delivery.releases.success_rate)"
-            :width="106"
-            :stroke-width="8"
-            :format="progressFormat"
-            color="#67c23a" />
-        </router-link>
-      </div>
-
-      <easy-title title="Web 网关 · 最近 24 小时" margin-set="30 16" />
-      <div v-loading="webLoading" class="web-monitoring">
-        <el-alert
-          v-if="!webLoading && !web.available"
-          :title="web.metric_note || '暂无可用的 Web 网关请求指标'"
-          type="warning"
-          :closable="false"
-          show-icon />
-        <template v-else-if="!webLoading">
-          <div class="web-grid">
-            <metric-card title="请求总量" :value="integer(webSummary.requests)" :footer="`当前 RPS ${number(webSummary.rps)}`" :to="r('monitoring')" />
-            <metric-card title="成功率" :value="`${number(webSummary.success_rate)}%`" :footer="`4xx ${integer(webSummary.client_errors)} / 5xx ${integer(webSummary.server_errors)}`" :to="r('monitoring')" compact />
-            <metric-card title="平均响应时间" :value="durationMs(webSummary.avg_seconds)" footer="全部 Web 路由加权平均" :to="r('monitoring')" compact />
-            <metric-card title="P95 / P99" :value="`${durationMs(webSummary.p95_seconds)} / ${durationMs(webSummary.p99_seconds)}`" footer="跨集群取最大值" :to="r('monitoring')" compact />
-            <metric-card title="请求流量" :value="bytes(webSummary.request_bytes)" footer="请求 Body 累计" :to="r('monitoring')" compact />
-            <metric-card title="响应流量" :value="bytes(webSummary.response_bytes)" footer="响应 Body 累计" :to="r('monitoring')" compact />
+        </section>
+        <recent-deliveries
+          :org-id="orgId"
+          :group-id="groupId"
+          :project-id="projectId"
+          :is-source="isSource"
+          :delivery="delivery"
+          :summary-available="overviewLoaded && !overviewError"
+          @settled="load" />
+        <section class="overview-panel monitoring-panel" v-loading="webLoading">
+          <div class="section-heading"><h3>运行摘要 <small>最近 24 小时</small></h3><router-link :to="r('monitoring')" class="inline-link">完整监控与告警 <i class="el-icon-arrow-right"></i></router-link></div>
+          <div v-if="web.available" class="monitoring-summary">
+            <div><span>Web 请求</span><strong>{{ integer(webSummary.requests) }}</strong><small>{{ number(webSummary.rps) }} RPS</small></div>
+            <div><span>请求成功率</span><strong>{{ number(webSummary.success_rate) }}%</strong><small>5xx {{ integer(webSummary.server_errors) }}</small></div>
+            <div><span>P95 响应时间</span><strong>{{ durationMs(webSummary.p95_seconds) }}</strong><small>目标 ≤ {{ integer(webSloObjectives.p95_ms_max) }} ms</small></div>
+            <div><span>Web SLO</span><el-tag :type="webSloTagType" size="small">{{ webSloStatusText }}</el-tag><small>可用性 {{ sloValue(webSlo.availability, '%') }}</small></div>
           </div>
-          <div class="web-slo-heading">
-            <strong>Web SLO</strong>
-            <el-tag :type="webSloTagType" size="small">{{ webSloStatusText }}</el-tag>
-            <span>目标可在监控页面的告警设置中调整</span>
-          </div>
-          <div class="web-slo-grid">
-            <metric-card title="可用性" :value="sloValue(webSlo.availability, '%')" :footer="`目标 ≥ ${number(webSloObjectives.availability_target)}% · ${sloCheckText('availability')}`" :to="r('monitoring')" compact />
-            <metric-card title="请求成功率" :value="sloValue(webSlo.success_rate, '%')" :footer="`目标 ≥ ${number(webSloObjectives.success_rate_target)}% · ${sloCheckText('success_rate')}`" :to="r('monitoring')" compact />
-            <metric-card
-              title="P95 响应时间"
-              :value="sloValue(webSlo.p95_ms, ' ms')"
-              :footer="`目标 ≤ ${integer(webSloObjectives.p95_ms_max)} ms · ${sloCheckText('p95')}`"
-              :to="r('monitoring')"
-              :type="p95LatencyType"
-              compact />
-          </div>
-        </template>
+          <div v-else-if="!webLoading" class="monitoring-empty">{{ web.metric_note || '暂无 Web 请求指标，配置访问路由后可在此查看运行情况。' }}</div>
+          <div v-if="web.partial" class="monitoring-empty">部分集群指标暂不可用，当前摘要仅包含已获取的数据。</div>
+        </section>
       </div>
     </div>
   </div>
@@ -150,11 +62,9 @@
 
 <script>
 import Breadcrumb from '@/views/project/components/Breadcrumb'
-import EasyTitle from '@/views/components/EasyTitle'
-import MetricCard from '@/views/project/components/MetricCard'
-import { projectHttpMonitoringSummary, projectOverview, projectOverviewSource } from '@/api/project'
+import RecentDeliveries from '@/views/project/components/RecentDeliveries'
+import { projectHttpMonitoringSummary, projectOverview } from '@/api/project'
 import { formatTimeDiffNow, routeBreadcrumb } from '@/utils/helpers'
-import { latencyTypeFromMilliseconds } from '@/utils/metricStatus'
 
 const emptyOverview = () => ({
   source: {
@@ -192,7 +102,7 @@ const emptyOverview = () => ({
 
 export default {
   name: 'ProjectOverview',
-  components: { Breadcrumb, EasyTitle, MetricCard },
+  components: { Breadcrumb, RecentDeliveries },
   props: {
     project: { type: Object, default: null },
     orgId: { type: [Number, String], required: true },
@@ -203,7 +113,8 @@ export default {
     return {
       overview: emptyOverview(),
       loading: false,
-      sourceLoading: false,
+      overviewLoaded: false,
+      overviewError: false,
       webLoading: false
     }
   },
@@ -223,50 +134,56 @@ export default {
     webSloTagType () {
       return this.webSlo.status === 'met' ? 'success' : this.webSlo.status === 'breached' ? 'danger' : 'info'
     },
-    p95LatencyType () {
-      return latencyTypeFromMilliseconds(this.webSlo.p95_ms)
-    },
     webSloStatusText () {
       return this.webSlo.status === 'met' ? '全部达标' : this.webSlo.status === 'breached' ? '存在未达标项' : '暂无数据'
     },
-    sourceRoute () { return this.project.develop ? this.r('gitrepo/profile') : this.r('build/artifacts') },
+    isSource () { return Boolean(Number(this.project.develop)) },
+    sourceRoute () { return this.isSource ? this.r('gitrepo/profile') : this.r('build/artifacts') },
+    canOperate () { return this.$p('project.no_viewer', this.project.org_role, this.project.group_role, this.project.role) },
+    stages () {
+      const o = this.overview
+      return [
+        ...(this.isSource ? [{ title: '代码仓库', icon: 'el-icon-connection', to: this.sourceRoute, value: o.source.default_branch || 'Git 仓库', note: this.sourceStatus, state: o.source.connection_status === 'error' ? 'error' : o.source.configured ? 'ready' : 'pending' }] : []),
+        ...(this.isSource ? [{ title: '构建', icon: 'el-icon-set-up', to: this.r('build'), value: `${o.pipeline.active} 条流水线`, note: o.build.running ? `${o.build.running} 个任务执行中` : '选择代码版本生成镜像', state: o.pipeline.active ? 'ready' : 'pending' }] : []),
+        { title: '镜像制品', icon: 'el-icon-box', to: this.r('build/artifacts'), value: `${o.artifact.total} 个制品`, note: this.isSource ? '构建产物，可追溯至提交' : '导入已有镜像后发布', state: o.artifact.total ? 'ready' : 'pending' },
+        { title: '部署', icon: 'el-icon-upload2', to: this.r('deploy'), value: `${o.release.total} 次发布`, note: o.release.deploying ? `${o.release.deploying} 个发布执行中` : '选择镜像与目标环境', state: o.release.total ? 'ready' : 'pending' },
+        { title: '运行实例', icon: 'el-icon-monitor', to: this.r('instance'), value: `${o.runtime.services} 个实例`, note: `副本 ${o.runtime.running_replicas}/${o.runtime.desired_replicas}`, state: o.runtime.unhealthy ? 'error' : o.runtime.services ? 'ready' : 'pending' }
+      ]
+    },
+    nextAction () {
+      const o = this.overview
+      if (o.runtime.unhealthy) return { label: '查看异常实例', to: this.r('instance') }
+      if (this.isSource && (!o.source.configured || o.source.connection_status === 'error')) return { label: '查看代码仓库', to: this.sourceRoute }
+      if (this.isSource && !o.pipeline.active) return { label: '配置流水线', to: this.r('pipeline') }
+      if (!o.artifact.total) return { label: this.isSource ? '发起构建' : '导入镜像', to: this.isSource ? { path: this.r('build'), query: { action: 'build' } } : this.r('build/artifacts') }
+      if (!o.runtime.services) return { label: '选择镜像部署', to: this.r('build/artifacts') }
+      return { label: '查看运行监控', to: this.r('monitoring') }
+    },
     lastActivity () { return this.overview.last_activity_at ? `${formatTimeDiffNow(this.overview.last_activity_at)}前` : '暂无' },
     readinessLabel () {
       return ({ success: '运行正常', warning: '需要配置', error: '存在异常' })[this.readinessType]
     },
-    readinessTagType () { return this.readinessType === 'error' ? 'danger' : this.readinessType },
     readinessIcon () {
       return ({ success: 'el-icon-success', warning: 'el-icon-warning', error: 'el-icon-error' })[this.readinessType]
     },
     sourceStatus () {
-      if (!this.project.develop) return this.overview.source.configured ? 'Registry 已关联' : '未配置'
+      if (!this.isSource) return this.overview.source.configured ? 'Registry 已关联' : '未配置'
       return ({ reachable: '可访问', error: '异常', unknown: '未检查', missing: '未配置' })[this.overview.source.connection_status] || '未知'
     },
-    commitCount () {
-      return this.overview.source.commit_count_available ? Number(this.overview.source.commit_count || 0) : '-'
-    },
-    sourceFooter () {
-      if (this.project.develop && this.sourceLoading) return '正在读取 Git Vendor API…'
-      return this.project.develop
-        ? (this.overview.source.commit_count_available
-            ? 'Git Vendor API · 默认分支'
-            : (this.overview.source.configured ? 'Git Vendor API 暂不可用' : '尚未配置 Git 仓库'))
-        : `${this.overview.source.image_name || '-'} · ${this.overview.source.registry_count} 个 Registry`
-    },
     readinessMessage () {
-      if (this.project.develop && !this.overview.source.configured) return '尚未配置 Git 仓库，无法进入开发和构建阶段。'
-      if (this.project.develop && this.overview.source.connection_status === 'error') return 'Git 仓库最近一次检查失败，请先修复仓库地址或凭据。'
-      if (this.project.develop && !this.overview.pipeline.active) return '尚未创建有效流水线，代码暂时无法构建为镜像。'
-      if (!this.project.develop && !this.overview.source.configured && !this.overview.artifact.total) return '尚未关联镜像 Registry，无法校验并登记可部署的 OCI 镜像。'
-      if (!this.project.develop && !this.overview.source.configured) return '已有历史镜像制品仍可部署，但当前未关联 Registry，无法校验并导入新的镜像版本。'
-      if (!this.overview.artifact.total) return this.project.develop ? '尚无镜像制品，请选择确定的 Git Commit 发起构建。' : '尚未登记可部署的 OCI 镜像。'
-      if (!this.overview.runtime.services) return '镜像制品已就绪，下一步可以创建首次 Swarm 发布。'
-      if (this.overview.runtime.unhealthy) return `有 ${this.overview.runtime.unhealthy} 个运行实例异常，请进入实例或集群 Service 页面处理。`
-      return '项目开发、构建和运行链路已建立。'
+      if (this.overview.runtime.unhealthy) return `有 ${this.overview.runtime.unhealthy} 个运行实例异常，请查看实例状态。`
+      if (this.isSource && !this.overview.source.configured) return '尚未配置 Git 仓库，无法进入开发和构建阶段。'
+      if (this.isSource && this.overview.source.connection_status === 'error') return 'Git 仓库最近一次检查失败，请先修复仓库地址或凭据。'
+      if (this.isSource && !this.overview.pipeline.active) return '尚未创建有效流水线，代码暂时无法构建为镜像。'
+      if (!this.isSource && !this.overview.source.configured && !this.overview.artifact.total) return '尚未关联镜像 Registry，无法校验并登记可部署的 OCI 镜像。'
+      if (!this.isSource && !this.overview.source.configured) return '已有历史镜像制品仍可部署，但当前未关联 Registry，无法校验并导入新的镜像版本。'
+      if (!this.overview.artifact.total) return this.isSource ? '尚无镜像制品，请选择确定的 Git Commit 发起构建。' : '尚未登记可部署的 OCI 镜像。'
+      if (!this.overview.runtime.services) return '镜像制品已就绪，下一步可以选择目标环境进行首次部署。'
+      return '交付链路已就绪，运行实例正常。'
     },
     readinessType () {
       if (this.overview.runtime.unhealthy || this.overview.source.connection_status === 'error') return 'error'
-      if (!this.overview.source.configured || (this.project.develop && !this.overview.pipeline.active) || !this.overview.artifact.total || !this.overview.runtime.services) return 'warning'
+      if (!this.overview.source.configured || (this.isSource && !this.overview.pipeline.active) || !this.overview.artifact.total || !this.overview.runtime.services) return 'warning'
       return 'success'
     }
   },
@@ -275,49 +192,25 @@ export default {
     r (suffix) { return `/project/${this.groupId}/${this.projectId}/${suffix}` },
     number (value) { return Number(value || 0).toFixed(2).replace(/\.00$/, '') },
     integer (value) { return Math.round(Number(value || 0)).toLocaleString() },
-    percentage (value) { return Math.max(0, Math.min(100, Number(value || 0))) },
-    progressFormat (value) { return `${this.number(value)}%` },
     durationMs (seconds) {
       const ms = Number(seconds || 0) * 1000
       return ms >= 1000 ? `${(ms / 1000).toFixed(2)} s` : `${ms.toFixed(ms < 10 ? 2 : 1)} ms`
     },
-    bytes (value) {
-      let size = Number(value || 0)
-      const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
-      let index = 0
-      while (size >= 1024 && index < units.length - 1) {
-        size /= 1024
-        index++
-      }
-      return `${size.toFixed(index === 0 ? 0 : 1)} ${units[index]}`
-    },
     sloValue (value, suffix) {
       return value === null || value === undefined ? '-' : `${this.number(value)}${suffix}`
     },
-    sloCheckText (key) {
-      return ({ met: '达标', breached: '未达标', no_data: '无数据' })[(this.webSlo.checks || {})[key]] || '无数据'
-    },
     load () {
+      if (this.loading) return
       this.loading = true
+      this.overviewError = false
       projectOverview(this.orgId, this.groupId, this.projectId)
         .then(res => {
           this.overview = Object.assign(emptyOverview(), res.data.overview || {})
-          this.loadSource()
+          this.overviewLoaded = true
           this.loadWebMonitoring()
         })
+        .catch(() => { this.overviewError = true })
         .finally(() => { this.loading = false })
-    },
-    loadSource () {
-      if (!this.project.develop || !this.overview.source.configured) {
-        this.sourceLoading = false
-        return
-      }
-      this.sourceLoading = true
-      projectOverviewSource(this.orgId, this.groupId, this.projectId)
-        .then(res => {
-          this.$set(this.overview, 'source', Object.assign({}, this.overview.source, res.data.source || {}))
-        })
-        .finally(() => { this.sourceLoading = false })
     },
     loadWebMonitoring () {
       this.webLoading = true
@@ -336,88 +229,44 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.status-hero {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px 22px;
-  border: 1px solid #d9ecff;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #f4f9ff, #fff);
-}
-.status-hero.status-success { border-color: #d5f1df; background: linear-gradient(135deg, #f0f9eb, #fff); }
-.status-hero.status-warning { border-color: #faecd8; background: linear-gradient(135deg, #fdf6ec, #fff); }
-.status-hero.status-error { border-color: #fde2e2; background: linear-gradient(135deg, #fef0f0, #fff); }
-.status-icon { display: grid; width: 46px; height: 46px; place-items: center; border-radius: 12px; background: #fff; color: #409eff; font-size: 25px; box-shadow: 0 4px 14px rgba(31, 45, 61, .08); }
-.status-warning .status-icon { color: #e6a23c; }
-.status-error .status-icon { color: #f56c6c; }
-.status-success .status-icon { color: #67c23a; }
-.status-copy { flex: 1; min-width: 0; }
-.eyebrow { margin-bottom: 4px; color: #909399; font-size: 12px; letter-spacing: .08em; }
-.status-copy h2 { margin: 0; color: #303133; font-size: 17px; font-weight: 600; line-height: 1.5; }
-.status-meta { margin-top: 5px; color: #909399; font-size: 12px; }
-.primary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.feature-card {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 116px;
-  padding: 18px;
-  overflow: hidden;
-  border: 1px solid #e4e7ed;
-  border-radius: 10px;
-  color: inherit;
-  background: #fff;
-  transition: transform .18s ease, box-shadow .18s ease;
-}
-.feature-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(31, 45, 61, .09); }
-.feature-icon { display: grid; flex: 0 0 48px; height: 48px; place-items: center; border-radius: 12px; background: #ecf5ff; color: #409eff; font-size: 23px; }
-.delivery-card .feature-icon { background: #f4f0ff; color: #7b61ff; }
-.runtime-card .feature-icon { background: #f0f9eb; color: #67c23a; }
-.feature-body { min-width: 0; }
-.feature-body span, .feature-body small { display: block; }
-.feature-label { margin-bottom: 8px; color: #909399; font-size: 13px; }
-.feature-body strong { color: #303133; font-size: 23px; font-style: normal; }
-.feature-body em { color: #606266; font-size: 13px; font-style: normal; font-weight: 400; }
-.feature-body small { margin-top: 8px; overflow: hidden; color: #909399; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-.feature-arrow { margin-left: auto; color: #c0c4cc; }
-.quick-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 16px; overflow: hidden; border: 1px solid #ebeef5; border-radius: 10px; background: #fff; }
-.quick-item { display: grid; grid-template-columns: 24px 1fr auto; align-items: center; gap: 5px 8px; padding: 15px 17px; color: #606266; border-right: 1px solid #ebeef5; }
-.quick-item:last-child { border-right: 0; }
-.quick-item > i { grid-row: 1 / 3; color: #409eff; font-size: 18px; }
-.quick-item > span { font-size: 13px; }
-.quick-item > strong { color: #303133; font-size: 19px; }
-.quick-item > small { color: #a0a4aa; font-size: 11px; }
-.delivery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
-.web-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.web-monitoring { min-height: 88px; }
-.web-slo-heading { display: flex; align-items: center; gap: 10px; margin: 20px 2px 10px; }
-.web-slo-heading > span { color: #909399; font-size: 12px; }
-.web-slo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.delivery-panel { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px 24px; border: 1px solid #e4e7ed; border-radius: 10px; color: inherit; background: #fff; }
-.delivery-panel:hover { border-color: #b3d8ff; }
-.panel-copy { flex: 1; min-width: 0; }
-.panel-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.panel-heading > div { display: flex; align-items: center; gap: 9px; color: #606266; font-weight: 600; }
-.panel-heading i { color: #409eff; font-size: 20px; }
-.release-panel .panel-heading i { color: #67c23a; }
-.panel-heading > strong { color: #303133; font-size: 28px; }
-.panel-heading small { color: #909399; font-size: 12px; font-weight: 400; }
-.panel-caption { color: #909399; font-size: 13px; line-height: 1.6; }
-.panel-link { margin-top: 15px; color: #409eff; font-size: 12px; }
-.release-panel .panel-link { color: #67c23a; }
-::v-deep .delivery-panel .el-progress__text { color: #303133; font-size: 17px !important; font-weight: 600; }
-@media (max-width: 1100px) {
-  .primary-grid { grid-template-columns: 1fr; }
-  .web-grid { grid-template-columns: repeat(2, 1fr); }
-  .quick-strip { grid-template-columns: repeat(2, 1fr); }
-  .quick-item:nth-child(2) { border-right: 0; }
-  .quick-item:nth-child(-n+2) { border-bottom: 1px solid #ebeef5; }
-}
-@media (max-width: 760px) {
-  .status-hero { align-items: flex-start; }
-  .delivery-grid, .quick-strip, .web-grid, .web-slo-grid { grid-template-columns: 1fr; }
-  .quick-item { border-right: 0; border-bottom: 1px solid #ebeef5; }
-}
+.overview-content { padding: 0 24px 28px; color: #303b4d; }
+.overview-toolbar { display: flex; justify-content: space-between; align-items: center; min-height: 76px; gap: 12px; }
+.overview-title { margin: 0; font-size: 17px; font-weight: 600; }
+.toolbar-actions { display: flex; gap: 10px; }
+.status-banner { display: flex; gap: 12px; align-items: center; border: 1px solid #e8edf3; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; background: #f8fafc; }
+.status-banner > i { font-size: 21px; }
+.status-success > i { color: #45a36e; }
+.status-warning > i { color: #cc9635; }
+.status-error > i { color: #e26363; }
+.status-copy { display: flex; flex-wrap: wrap; gap: 10px; flex: 1; line-height: 1.6; }
+.status-copy span { color: #6b7789; font-size: 13px; }
+.inline-link { font-size: 13px; color: #2378cf; white-space: nowrap; }
+.overview-panel { border: 1px solid #e7ecf2; border-radius: 10px; background: #fff; margin-bottom: 20px; overflow: hidden; }
+.section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 18px 20px; }
+.project-meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; color: #8893a3; }
+.project-meta a:hover { color: #2378cf; }
+.section-heading h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.section-heading > span, .section-heading small { color: #8893a3; font-size: 12px; font-weight: normal; margin-left: 8px; }
+.delivery-chain { display: flex; padding: 0 20px 20px; gap: 24px; }
+.chain-stage { position: relative; flex: 1; min-width: 0; padding: 16px; border: 1px solid #e7ecf2; border-radius: 8px; transition: border-color .15s, background .15s; }
+.chain-stage:hover { border-color: #a9cff8; background: #f8fbff; }
+.stage-heading { display: flex; align-items: center; gap: 7px; font-size: 13px; }
+.stage-heading > i { margin-left: auto; color: #8a99ac; }
+.stage-number { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; align-items: center; justify-content: center; font-size: 11px; color: #8a99ac; background: #f1f4f8; }
+.ready .stage-number { color: #38845f; background: #edf8f0; }
+.error .stage-number { color: #d55b5b; background: #fdf0f0; }
+.chain-stage strong { display: block; font-size: 18px; font-weight: 600; margin: 14px 0 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chain-stage small { display: block; color: #8793a3; font-size: 12px; line-height: 1.6; }
+.chain-arrow { position: absolute; right: -21px; top: 50%; color: #b2bfce; }
+.chain-support { display: flex; flex-wrap: wrap; gap: 24px; border-top: 1px solid #eef1f5; background: #fafbfd; padding: 12px 20px; font-size: 13px; }
+.chain-support span { color: #8893a3; font-size: 12px; margin-left: 8px; }
+.monitoring-summary { display: grid; grid-template-columns: repeat(4, 1fr); padding: 0 20px 20px; }
+.monitoring-summary > div { padding: 4px 20px; border-right: 1px solid #eef1f5; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.monitoring-summary > div:first-child { padding-left: 0; }
+.monitoring-summary > div:last-child { border: 0; }
+.monitoring-summary span, .monitoring-summary small { color: #8893a3; font-size: 12px; }
+.monitoring-summary strong { font-size: 24px; font-weight: 600; }
+.monitoring-empty { padding: 0 20px 20px; font-size: 13px; color: #8893a3; line-height: 1.7; }
+@media (max-width: 1250px) { .delivery-chain { gap: 16px; } .chain-stage { padding: 12px; } .chain-stage strong { font-size: 16px; } .chain-arrow { right: -16px; } }
+@media (max-width: 1000px) { .delivery-chain { flex-wrap: wrap; } .chain-stage { flex-basis: 25%; } .chain-arrow { display: none; } .monitoring-summary { grid-template-columns: repeat(2, 1fr); gap: 20px; } .overview-toolbar, .status-banner { flex-wrap: wrap; } }
 </style>

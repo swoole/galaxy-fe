@@ -109,7 +109,7 @@
           <el-button type="text" @click="goDeploy">查看全部部署</el-button>
         </div>
         <el-table :data="releases" empty-text="该镜像尚未部署" fit>
-          <el-table-column label="发布" width="90"><template #default="{ row }"><span class="compact-id">#{{ row.id }}</span></template></el-table-column>
+          <el-table-column label="发布" width="90"><template #default="{ row }"><router-link :to="{ name: 'ProjectDeploy', params: { groupId, projectId }, query: { release: row.id } }" class="text-link">#{{ row.id }}</router-link></template></el-table-column>
           <el-table-column label="目标" min-width="220">
             <template #default="{ row }">
               <div>{{ row.desired_spec && row.desired_spec.service_name ? row.desired_spec.service_name : '-' }}</div>

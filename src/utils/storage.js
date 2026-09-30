@@ -79,13 +79,18 @@ export const StorageKeys = {
 }
 
 export function cookieSetUser (user) {
+  const options = { expires: 7 }
+  if (cookieDomain) {
+    options.domain = cookieDomain
+  }
   Cookies.set(storagePrefix + StorageKeys.user, JSON.stringify({
     uid: user.id,
     email: user.email,
     nickname: user.nickname
-  }), { domain: cookieDomain, expires: 7 })
+  }), options)
 }
 
 export function cookieRemoveUser () {
-  Cookies.remove(storagePrefix + StorageKeys.user)
+  const options = cookieDomain ? { domain: cookieDomain } : undefined
+  Cookies.remove(storagePrefix + StorageKeys.user, options)
 }

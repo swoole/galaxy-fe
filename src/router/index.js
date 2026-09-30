@@ -212,7 +212,7 @@ export const constantRoutes = [
             path: '/project/:groupId/:projectId/profile',
             name: 'ProjectProfile',
             component: () => import('@/views/project/profile'),
-            meta: { nav: 'DevelopLayout', appNav: 'ProjectProfile', title: '项目详情' }
+            meta: { nav: 'DevelopLayout', appNav: 'ProjectProfile', title: '项目信息' }
           },
           {
             path: '/project/:groupId/:projectId/edit',
@@ -284,7 +284,7 @@ export const constantRoutes = [
             path: '/project/:groupId/:projectId/build/artifacts',
             name: 'ProjectArtifacts',
             component: () => import('@/views/project/build/artifacts'),
-            meta: { nav: 'DevelopLayout', appNav: 'ProjectArtifacts', title: '产物列表' }
+            meta: { nav: 'DevelopLayout', appNav: 'ProjectArtifacts', title: '镜像制品' }
           },
           {
             path: '/project/:groupId/:projectId/build/images/:artifactId(\\d+)',

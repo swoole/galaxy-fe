@@ -11,7 +11,7 @@
 
     <div class="myapp-info">
       <h2 class="myapp-title">{{ project.title }}</h2>
-      <!-- <el-tag class="myapp-type" size="mini" type="primary">{{ projectType }}</el-tag> -->
+      <span class="myapp-type">{{ Number(project.develop) ? '源码项目' : '镜像项目' }}</span>
     </div>
   </div>
 </template>
@@ -46,11 +46,12 @@ export default {
 <style lang="scss" scoped>
 .myapp-breadcrumb-container {
   background: #fff;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  padding: 6px 20px 12px 20px;
+  border-bottom: 1px solid #e7ecf2;
+  padding: 4px 24px 18px;
   .myapp-breadcrumb {
-    height: 48px;
-    line-height: 48px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 12px;
   }
   .myapp-info {
     .myapp-title {
@@ -62,6 +63,8 @@ export default {
     }
     .myapp-type {
       margin-left: 10px;
+      font-size: 12px;
+      color: #8893a3;
     }
   }
 }
